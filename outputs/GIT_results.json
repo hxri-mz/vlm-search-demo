@@ -1,0 +1,58 @@
+{
+    "7.jpg": {
+        "description": "a motorcycle and a car driving down a street.",
+        "model": "GIT"
+    },
+    "6.jpg": {
+        "description": "a green bus driving down a street next to trees.",
+        "model": "GIT"
+    },
+    "9.jpg": {
+        "description": "a city is a busy road.",
+        "model": "GIT"
+    },
+    "5.jpg": {
+        "description": "traffic on the highway in the city",
+        "model": "GIT"
+    },
+    "11.jpg": {
+        "description": "a street filled with traffic and a motorcycle.",
+        "model": "GIT"
+    },
+    "4.jpg": {
+        "description": "a bus driving down a street next to a tree.",
+        "model": "GIT"
+    },
+    "1.jpg": {
+        "description": "a city is a busy road.",
+        "model": "GIT"
+    },
+    "14.jpg": {
+        "description": "a cow is walking down the road in the country.",
+        "model": "GIT"
+    },
+    "8.jpg": {
+        "description": "a city street with motorcycles and cars",
+        "model": "GIT"
+    },
+    "2.jpg": {
+        "description": "a car drives down a street",
+        "model": "GIT"
+    },
+    "3.jpg": {
+        "description": "the driver of the car is trying to get into the car",
+        "model": "GIT"
+    },
+    "13.jpg": {
+        "description": "a herd of cows walking down a street.",
+        "model": "GIT"
+    },
+    "12.jpg": {
+        "description": "a cow walking down a street next to cars.",
+        "model": "GIT"
+    },
+    "10.jpg": {
+        "description": "traffic on the road in the city",
+        "model": "GIT"
+    }
+}
