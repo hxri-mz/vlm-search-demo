@@ -35,12 +35,28 @@
         "description": " The image depicts a busy city street with a mix of vehicles, including cars, motorcycles, and auto-rickshaws. The street is lined with trees, providing a pleasant atmosphere. There are several people walking along the sidewalk, some of them carrying handbags. The scene is bustling with activity, as people and vehicles navigate the urban environment.",
         "model": "MoonDream"
     },
+    "15.jpg": {
+        "description": " The image depicts a person walking down a wet, grassy road in a rural setting. The person is holding an umbrella to shield themselves from the rain. The road is surrounded by lush green trees and bushes, creating a serene atmosphere. The sky is overcast, adding to the gloomy mood of the scene. The person is walking away from the camera, giving a sense of depth to the image.",
+        "model": "MoonDream"
+    },
     "2.jpg": {
         "description": " The image depicts a busy city street with a variety of vehicles and pedestrians. A black car is driving down the road, followed by a yellow auto-rickshaw. There are also several other cars and a truck visible in the scene. A group of people is walking along the sidewalk, with some of them carrying backpacks.\n\nIn addition to the vehicles, there are a few pedestrians on the sidewalk, some of whom are carrying handbags. The street is lined with buildings, and a large concrete overpass can be seen in the background. The overall atmosphere of the scene is bustling and urban, with people going about their daily activities.",
         "model": "MoonDream"
     },
+    "16.jpg": {
+        "description": " The image depicts a busy road during a rainy day. Several vehicles, including cars, a bus, and a truck, are navigating the wet road. The cars are driving in the same direction, with one car slightly ahead of the others. The bus is located in the middle of the scene, and the truck is positioned to the left of the bus. The road is lined with trees, adding a touch of greenery to the scene. The rain is falling heavily, creating a misty atmosphere and making the road slippery for the vehicles.",
+        "model": "MoonDream"
+    },
+    "18.jpg": {
+        "description": " The image depicts a busy city street at night, filled with a variety of vehicles. There are several cars and a bus driving down the road, with some of the cars being white and green. A truck is also present in the scene, adding to the traffic. The street is illuminated by multiple traffic lights, which are green in color, guiding the flow of traffic. The scene is bustling with activity, as the vehicles navigate the city streets under the glow of the streetlights.",
+        "model": "MoonDream"
+    },
     "3.jpg": {
         "description": " The image depicts a busy city street with various vehicles and pedestrians. There are several cars, including a white SUV, a blue car, and a red car, driving down the road. A motorcycle is also present, with a rider in the foreground. In addition to the vehicles, there are two people riding bicycles, one on the left side of the road and the other on the right side.\n\nThere are also a few pedestrians visible in the scene, with one person standing near the left side of the road and another person standing closer to the right side. The street is lined with trees, providing a touch of greenery to the urban setting. A construction crane can be seen in the background, indicating ongoing development in the area.",
+        "model": "MoonDream"
+    },
+    "17.jpg": {
+        "description": " The image depicts a busy city street at night, with various vehicles and pedestrians navigating the area. A large blue bus is driving down the street, followed by a few cars and a truck. There are also a couple of motorcycles and a rickshaw in the scene. A person is walking down the street, carrying two plastic bottles.\n\nMultiple traffic lights are visible throughout the scene, ensuring the smooth flow of traffic. The street is lined with trees, providing a touch of greenery amidst the urban setting. The overall atmosphere is bustling and lively, with people and vehicles sharing the space.",
         "model": "MoonDream"
     },
     "13.jpg": {

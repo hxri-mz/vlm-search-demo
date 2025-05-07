@@ -35,12 +35,28 @@
         "description": "there are many people riding motorcycles down the street on the street",
         "model": "BLIP"
     },
+    "15.jpg": {
+        "description": "there is a person walking down a road with an umbrella",
+        "model": "BLIP"
+    },
     "2.jpg": {
         "description": "cars are driving down a street with a bridge in the background",
         "model": "BLIP"
     },
+    "16.jpg": {
+        "description": "cars driving down a wet road in the rain with trees in the background",
+        "model": "BLIP"
+    },
+    "18.jpg": {
+        "description": "cars are stopped at a traffic light at night on a busy street",
+        "model": "BLIP"
+    },
     "3.jpg": {
         "description": "cars and motorcycles on a street with a man on a motorcycle",
+        "model": "BLIP"
+    },
+    "17.jpg": {
+        "description": "cars and buses on a busy street at night with green lights",
         "model": "BLIP"
     },
     "13.jpg": {

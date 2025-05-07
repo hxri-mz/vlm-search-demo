@@ -74,112 +74,129 @@ def process_data(opt, image, model, processor, prompt):
 # Configs
 output_path = "outputs/"
 json_file = "results.json"
-output_folder = "output"
-# prompt = "Describe the scene with objects and their colors, number of lanes, whether it's marked or not, weather (sunny, rainy, snow, cloudy), and time of day (morning, night, dawn, dusk). Mention pedestrians if present."
-prompt = "Describe the road driving scene in detail"
+output_folder = "outputs"
+prompt = "Describe the scene with objects and their colors, number of lanes, whether it's marked or not, weather (sunny, rainy, snow, cloudy), and time of day (morning, night, dawn, dusk). Mention pedestrians if present."
+# prompt = "Describe the road driving scene in detail"
 
 # Streamlit
 st.title("VLM based image search")
-options = st.radio(
-    "Select an option to continue",
-    ["Process data", "Search"],
-    captions=['', 'Make sure you process data first if not done.',]
+st.markdown('Make sure to run  <text style="background-color: #9cf4f7; border: 1.5px solid #72b3b5; border-radius: 8px; padding: 1.5px 6px 3.5px 6px;">Process data</text>  before searching', unsafe_allow_html=True, help=None)
+
+tab1, tab2 = st.tabs(["Process data", "Search"])
+
+opt = tab1.selectbox(
+    "Select a VLM model to process data",
+    ("MoonDream", "BLIP", "GIT", "UForm"),
 )
-st.divider()
+model, processor = load_model(opt)
+folder_path = tab1.text_input("Enter image folder path", value="data/")
+if tab1.button("Process Images"):
+    if not os.path.exists(folder_path):
+        tab1.error("Folder path does not exist.")
+    else:
+        os.makedirs(output_folder, exist_ok=True)
+        results = {}
 
-if options == "Process data":
-    opt = st.selectbox(
-        "Select a VLM model to process data",
-        ("MoonDream", "BLIP", "GIT", "UForm"),
-    )
-    model, processor = load_model(opt)
-    folder_path = st.text_input("Enter image folder path", value="data/")
-    if st.button("Process Images"):
-        if not os.path.exists(folder_path):
-            st.error("Folder path does not exist.")
-        else:
-            os.makedirs(output_folder, exist_ok=True)
-            results = {}
+        image_files = [f for f in os.listdir(folder_path)
+                    if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
 
-            image_files = [f for f in os.listdir(folder_path)
-                        if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+        total_images = len(image_files)
 
-            total_images = len(image_files)
+        pbar = tab1.progress(0)
+        count = 0
+        for idx, fname in enumerate(image_files):
+            print(f'processing {idx}')
+            image_path = os.path.join(folder_path, fname)
+            image = Image.open(image_path).convert("RGB")
+            
+            try:
+                description = process_data(opt, image, model, processor, prompt)
+                results[fname] = {
+                    "description": description,
+                    "model": opt,
+                }
 
-            pbar = st.progress(0)
-            count = 0
-            for idx, fname in enumerate(image_files):
-                print(f'processing {idx}')
-                image_path = os.path.join(folder_path, fname)
-                image = Image.open(image_path).convert("RGB")
-                
-                try:
-                    description = process_data(opt, image, model, processor, prompt)
-                    results[fname] = {
-                        "description": description,
-                        "model": opt,
-                    }
+            except Exception as e:
+                tab1.warning(f"Error processing {fname}: {e}")
+                continue
+            count += 1
+            pbar.progress(count + int(100/total_images))
+        with open(output_path+opt+'_'+json_file, "w") as f:
+            json.dump(results, f, indent=4)
+        pbar.empty()
 
-                except Exception as e:
-                    st.warning(f"Error processing {fname}: {e}")
-                    continue
-                count += 1
-                pbar.progress(count + int(100/total_images))
-            with open(output_path+opt+'_'+json_file, "w") as f:
-                json.dump(results, f, indent=4)
-            pbar.empty()
+        tab1.success(f"Processing complete. Output saved to {output_path+opt+'_'+json_file}")
 
-            st.success(f"Processing complete. Output saved to {output_path+opt+'_'+json_file}")
-else:            
-    search_term = st.text_input("Enter search term", "")
-    opt = st.selectbox(
-        "Select a VLM model to use for search",
-        ("MoonDream", "BLIP", "GIT", "UForm"),
-    )
-    if st.button("Search"):
-        if search_term:
-            if os.path.exists(output_path+opt+'_'+json_file):
-                with open(output_path+opt+'_'+json_file, "r") as f:
-                    results = json.load(f)
+opt = tab2.selectbox(
+    "Select a VLM model to use for search",
+    ("MoonDream", "BLIP", "GIT", "UForm"),
+)            
+search_term = tab2.text_input("Enter search term", "")
 
-                matches = []
-                for filename, data in results.items():
-                    description = data.get('description', "")
-                    # import pdb; pdb.set_trace()
-                    md = data.get('model', "")
-                    search_term_lower = search_term.lower()
-                    if search_term_lower in description.lower().split():
-                        words = description.split()
-                        highlighted_words = [
-                            # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
-                            f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() == search_term_lower else word
-                            for word in words
-                        ]
-                        highlighted_description = " ".join(highlighted_words)
-                        matches.append({
-                            "filename": filename,
-                            "description": highlighted_description,
-                            "model": md,
-                        })
-                
-                if matches:
-                    st.subheader("Matches Found:")
-                    for match in matches:                    
-                        st.markdown(f"""**File**: {match['filename']} <br> **VLM Model**: {match['model']}""", unsafe_allow_html=True)
-                        # st.write(f"**VLM Model**: {match['model']}")
-                        st.markdown(body=f"**Description**: {match['description']}", unsafe_allow_html=True, help=None)
-                        
-                        image_path = os.path.join("data", match['filename'])
-                        if os.path.exists(image_path):
-                            image = Image.open(image_path)                        
-                            st.image(image)
-                        else:
-                            st.warning(f"Image file {match['filename']} not found.")
-                        st.divider()
+tab2.write("Select time of day")
+c = tab2.container()
+with tab2:
+    col11, col12, _, _, _, _ = st.columns(6)
+    with col11:
+        night = st.checkbox(label="Night")
+    with col12:
+        morning = st.checkbox("Morning")
 
-                else:
-                    st.write("No matches found.")
+tab2.write("Select weather")
+with tab2:
+    col21, col22, col23, col24, _, _  = st.columns(6)
+    with col21:
+        sunny = st.checkbox(label="Clear")
+    with col22:
+        rainy = st.checkbox("Rainy")
+    with col23:
+        st.checkbox("Snow")
+    with col24:
+        st.checkbox("Fog")
+
+if tab2.button("Search"):
+    if search_term:
+        if os.path.exists(output_path+opt+'_'+json_file):
+            with open(output_path+opt+'_'+json_file, "r") as f:
+                results = json.load(f)
+
+            matches = []
+            for filename, data in results.items():
+                description = data.get('description', "")
+                # import pdb; pdb.set_trace()
+                md = data.get('model', "")
+                search_term_lower = search_term.lower()
+                if search_term_lower in description.lower().split():
+                    words = description.split()
+                    highlighted_words = [
+                        # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
+                        f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() == search_term_lower else word
+                        for word in words
+                    ]
+                    highlighted_description = " ".join(highlighted_words)
+                    matches.append({
+                        "filename": filename,
+                        "description": highlighted_description,
+                        "model": md,
+                    })
+            
+            if matches:
+                tab2.subheader("Matches Found:")
+                for match in matches:                    
+                    tab2.markdown(f"""**File**: {match['filename']} <br> **VLM Model**: {match['model']}""", unsafe_allow_html=True)
+                    tab2.markdown(body=f"**Description**: {match['description']}", unsafe_allow_html=True, help=None)
+                    
+                    image_path = os.path.join("data", match['filename'])
+                    if os.path.exists(image_path):
+                        image = Image.open(image_path)                        
+                        tab2.image(image)
+                    else:
+                        tab2.warning(f"Image file {match['filename']} not found.")
+                    tab2.divider()
+
             else:
-                st.error(f"No results found. Please process images first.")
+                tab2.write("No matches found.")
         else:
-            st.warning(f"Enter a search term.")
+            tab2.error(f"No results found. Please process images first.")
+    else:
+        tab2.warning(f"Enter a search term.")

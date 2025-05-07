@@ -35,12 +35,28 @@
         "description": "a city street with motorcycles and cars",
         "model": "GIT"
     },
+    "15.jpg": {
+        "description": "a person walking down a road with an umbrella.",
+        "model": "GIT"
+    },
     "2.jpg": {
         "description": "a car drives down a street",
         "model": "GIT"
     },
+    "16.jpg": {
+        "description": "traffic on a road during heavy rain.",
+        "model": "GIT"
+    },
+    "18.jpg": {
+        "description": "traffic jam in the city",
+        "model": "GIT"
+    },
     "3.jpg": {
         "description": "the driver of the car is trying to get into the car",
+        "model": "GIT"
+    },
+    "17.jpg": {
+        "description": "a bus is seen at night.",
         "model": "GIT"
     },
     "13.jpg": {
