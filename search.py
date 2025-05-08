@@ -133,26 +133,33 @@ opt = tab2.selectbox(
 )            
 search_term = tab2.text_input("Enter search term", "")
 
+night = {'tag':'night', 'toggle': False}
+morning = {'tag':'morning', 'toggle': False}
+sunny = {'tag':'sunny', 'toggle': False}
+rainy = {'tag':'rainy', 'toggle': False}
+snow = {'tag':'snow', 'toggle': False}
+fog = {'tag':'fog', 'toggle': False}
+
 tab2.write("Select time of day")
 c = tab2.container()
 with tab2:
     col11, col12, _, _, _, _ = st.columns(6)
     with col11:
-        night = st.checkbox(label="Night")
+        night['toggle'] = st.checkbox("Night")
     with col12:
-        morning = st.checkbox("Morning")
+        morning['toggle'] = st.checkbox("Morning")
 
 tab2.write("Select weather")
 with tab2:
     col21, col22, col23, col24, _, _  = st.columns(6)
     with col21:
-        sunny = st.checkbox(label="Clear")
+        sunny['toggle'] = st.checkbox("Clear")
     with col22:
-        rainy = st.checkbox("Rainy")
+        rainy['toggle'] = st.checkbox("Rainy")
     with col23:
-        st.checkbox("Snow")
+        snow['toggle'] = st.checkbox("Snow")
     with col24:
-        st.checkbox("Fog")
+        fog['toggle'] = st.checkbox("Fog")
 
 if tab2.button("Search"):
     if search_term:
@@ -166,11 +173,16 @@ if tab2.button("Search"):
                 # import pdb; pdb.set_trace()
                 md = data.get('model', "")
                 search_term_lower = search_term.lower()
-                if search_term_lower in description.lower().split():
-                    words = description.split()
+                words = description.lower().replace(',', '').split()
+                search_terms = []
+                search_terms.append(search_term_lower)
+                for tag in [night, morning, sunny, rainy, snow, fog]:
+                    if tag['toggle']:
+                        search_terms.append(tag['tag'])
+                if set(search_terms).issubset(words):
                     highlighted_words = [
                         # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
-                        f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() == search_term_lower else word
+                        f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() in search_terms else word 
                         for word in words
                     ]
                     highlighted_description = " ".join(highlighted_words)
@@ -179,6 +191,7 @@ if tab2.button("Search"):
                         "description": highlighted_description,
                         "model": md,
                     })
+                    
             
             if matches:
                 tab2.subheader("Matches Found:")
