@@ -170,7 +170,6 @@ if tab2.button("Search"):
             matches = []
             for filename, data in results.items():
                 description = data.get('description', "")
-                # import pdb; pdb.set_trace()
                 md = data.get('model', "")
                 search_term_lower = search_term.lower()
                 words = description.lower().replace(',', '').split()
