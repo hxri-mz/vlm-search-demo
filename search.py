@@ -80,7 +80,7 @@ prompt = "Describe the scene with objects and their colors, number of lanes, whe
 
 # Streamlit
 st.title("VLM based image search")
-st.markdown('Make sure to run  <text style="background-color: #9cf4f7; border: 1.5px solid #72b3b5; border-radius: 8px; padding: 1.5px 6px 3.5px 6px;">Process data</text>  before searching', unsafe_allow_html=True, help=None)
+st.markdown('Make sure to run  <text style="border: 1.5px solid #72b3b5; border-radius: 8px; padding: 1.5px 6px 3.5px 6px; margin: 0px 6px 0px 6px;">Process data</text>  before searching', unsafe_allow_html=True, help=None)
 
 tab1, tab2 = st.tabs(["Process data", "Search"])
 
