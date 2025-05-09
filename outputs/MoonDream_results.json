@@ -15,12 +15,24 @@
         "description": " Foggy, highway, 2 lanes, marked, morning, no pedestrians",
         "model": "MoonDream"
     },
+    "26.jpg": {
+        "description": " The scene is at dusk, with a cloudy sky. There are multiple lanes, marked by yellow lines. The road is not marked, and there are no pedestrians visible. The weather appears to be overcast.",
+        "model": "MoonDream"
+    },
     "9.jpg": {
         "description": " The scene is a city street with a mix of vehicles, including cars, auto-rickshaws, and a bus. There are two lanes visible, and the road appears to be marked with white lines. The weather seems to be sunny, and the time of day is likely morning or early evening. Pedestrians are present on the sidewalk.",
         "model": "MoonDream"
     },
     "5.jpg": {
         "description": " The scene is a city street with multiple lanes. There are markings on the road, and it appears to be a sunny day. There are a few pedestrians visible. The time of day is likely dusk or dawn, as the sky is a light blue-grey color.",
+        "model": "MoonDream"
+    },
+    "28.jpg": {
+        "description": " Two taxis are driving down a road. The road has two lanes. There is no visible marking on the road. The sky is overcast and gray. It appears to be morning or early evening.",
+        "model": "MoonDream"
+    },
+    "25.jpg": {
+        "description": " The scene is at night. There are two lanes of traffic, marked by yellow lines. The road appears to be wet, possibly from rain. There are no pedestrians visible. The sky is dark, suggesting it's nighttime.",
         "model": "MoonDream"
     },
     "11.jpg": {
@@ -35,12 +47,20 @@
         "description": " The scene is a city street with a single lane. It is marked with a white line. The weather is sunny. It is daytime. There are no pedestrians visible.",
         "model": "MoonDream"
     },
+    "27.jpg": {
+        "description": " The scene is a multi-lane highway with a cloudy, overcast sky. There are no pedestrians visible. The weather appears to be overcast and possibly rainy. The time of day is dusk or dawn, as the sky is a muted gray-blue.",
+        "model": "MoonDream"
+    },
     "1.jpg": {
         "description": " The scene is a city street with a green auto rickshaw, a motorcycle, and several cars. There are two lanes of traffic. The weather appears to be sunny. It is daytime.",
         "model": "MoonDream"
     },
     "14.jpg": {
         "description": " The scene is a rural highway with a single lane. It is marked with white lines. The weather is sunny. The time of day is morning. There are no pedestrians visible.",
+        "model": "MoonDream"
+    },
+    "24.jpg": {
+        "description": " The scene depicts a busy city street at night, with multiple lanes of traffic. The road appears to be marked with lines. The weather is unclear, but it is nighttime. The time of day is night. There are no pedestrians visible in the image.",
         "model": "MoonDream"
     },
     "8.jpg": {
@@ -63,6 +83,10 @@
         "description": " The scene depicts a rainy day on a multi-lane road. There are three lanes visible, and the road appears to be marked with yellow lines. The weather is rainy, and the light suggests it's either dawn or dusk. There are no pedestrians visible in the image.",
         "model": "MoonDream"
     },
+    "29.jpg": {
+        "description": " The scene is a street with a group of children walking. There are two lanes, and the road appears to be marked. The weather is sunny, and it seems to be daytime. The time of day is not definitively dawn or dusk, but it is likely morning or early afternoon. There are a few cars and a motorcycle present.",
+        "model": "MoonDream"
+    },
     "18.jpg": {
         "description": " The scene depicts a busy city street at night, with multiple lanes of traffic. There are several cars, a bus, and a three-wheeled auto-rickshaw. The traffic lights are green, indicating a clear path for vehicles. The weather appears to be clear and sunny. The time of day is night, as evidenced by the darkness and the presence of streetlights. No pedestrians are visible in the image.",
         "model": "MoonDream"
@@ -81,6 +105,10 @@
     },
     "12.jpg": {
         "description": " The scene is a busy street with multiple lanes, marked by white lines. It appears to be a sunny day, and the time of day is likely morning or early afternoon. There are pedestrians present, and the vehicles are mostly blue and white.",
+        "model": "MoonDream"
+    },
+    "23.jpg": {
+        "description": " The scene is at night. There are two lanes of traffic, and the road appears to be marked with yellow lines. The sky is dark, and there are no visible clouds. The traffic lights are red. There are no pedestrians visible in the image.",
         "model": "MoonDream"
     },
     "10.jpg": {

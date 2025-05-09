@@ -3,8 +3,20 @@
         "description": "a motorcycle and a car driving down a street.",
         "model": "GIT"
     },
+    "21.jpg": {
+        "description": "cars drive through a foggy road.",
+        "model": "GIT"
+    },
     "6.jpg": {
         "description": "a green bus driving down a street next to trees.",
+        "model": "GIT"
+    },
+    "22.jpg": {
+        "description": "foggy conditions on the highway",
+        "model": "GIT"
+    },
+    "26.jpg": {
+        "description": "a street with a truck and a motorcycle.",
         "model": "GIT"
     },
     "9.jpg": {
@@ -15,12 +27,28 @@
         "description": "traffic on the highway in the city",
         "model": "GIT"
     },
+    "28.jpg": {
+        "description": "the road to the airport",
+        "model": "GIT"
+    },
+    "25.jpg": {
+        "description": "the road to the city",
+        "model": "GIT"
+    },
     "11.jpg": {
         "description": "a street filled with traffic and a motorcycle.",
         "model": "GIT"
     },
+    "19.jpg": {
+        "description": "cars stuck in a traffic jam on a snowy road",
+        "model": "GIT"
+    },
     "4.jpg": {
         "description": "a bus driving down a street next to a tree.",
+        "model": "GIT"
+    },
+    "27.jpg": {
+        "description": "a view of the highway from the car",
         "model": "GIT"
     },
     "1.jpg": {
@@ -29,6 +57,10 @@
     },
     "14.jpg": {
         "description": "a cow is walking down the road in the country.",
+        "model": "GIT"
+    },
+    "24.jpg": {
+        "description": "traffic jams at the junction",
         "model": "GIT"
     },
     "8.jpg": {
@@ -43,8 +75,16 @@
         "description": "a car drives down a street",
         "model": "GIT"
     },
+    "20.jpg": {
+        "description": "a man pushes a car through the snow",
+        "model": "GIT"
+    },
     "16.jpg": {
         "description": "traffic on a road during heavy rain.",
+        "model": "GIT"
+    },
+    "29.jpg": {
+        "description": "children running in the street",
         "model": "GIT"
     },
     "18.jpg": {
@@ -65,6 +105,10 @@
     },
     "12.jpg": {
         "description": "a cow walking down a street next to cars.",
+        "model": "GIT"
+    },
+    "23.jpg": {
+        "description": "cars wait at a red light at a busy intersection.",
         "model": "GIT"
     },
     "10.jpg": {

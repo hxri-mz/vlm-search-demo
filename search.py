@@ -11,8 +11,9 @@ import streamlit as st
 import os
 import json
 from PIL import Image
-from transformers import AutoModel, AutoModelForCausalLM, BlipProcessor, BlipForConditionalGeneration, AutoProcessor
+from transformers import AutoModel, AutoModelForCausalLM, BlipProcessor, BlipForConditionalGeneration, AutoProcessor, AutoTokenizer
 import torch
+from openai import OpenAI
 
 # Model loading
 @st.cache_resource
@@ -34,7 +35,7 @@ def load_model(opt):
         model = AutoModelForCausalLM.from_pretrained("microsoft/git-base-coco").to("cuda")
         return model, processor
     elif opt == 'UForm':
-        model = AutoModel.from_pretrained("unum-cloud/uform-gen2-dpo", trust_remote_code=True).to("cuda")
+        model = AutoModel.from_pretrained("unum-cloud/uform-gen2-dpo", trust_remote_code=True).to("cpu")
         processor = AutoProcessor.from_pretrained("unum-cloud/uform-gen2-dpo", trust_remote_code=True)
         return model, processor
 
@@ -57,7 +58,7 @@ def process_data(opt, image, model, processor, prompt):
         return generated_caption
     
     elif opt == 'UForm':
-        inputs = processor(text=[prompt], images=[image], return_tensors="pt").to("cuda")
+        inputs = processor(text=[prompt], images=[image], return_tensors="pt").to("cpu")
         with torch.inference_mode():
             output = model.generate(
                 **inputs,
@@ -71,10 +72,45 @@ def process_data(opt, image, model, processor, prompt):
         decoded_text = processor.batch_decode(output[:, prompt_len:])[0]
         return decoded_text
     
+def load_llm_search(lm):
+    llmmodel = AutoModelForCausalLM.from_pretrained(
+        lm,
+        torch_dtype="auto",
+        device_map="cuda"
+    )
+    llmtokenizer = AutoTokenizer.from_pretrained(lm)
+    return llmmodel, llmtokenizer
+
+def llm_search(terms, words, model, tokenizer):
+    prompt = f"'{words}'. Does the paragraph explicitly say anything about atleast one of {terms}?. It has to be a word match either direct, adjective, verb or derived. Reply with True or False."
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt}
+    ]
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+    model_inputs = tokenizer([text], return_tensors="pt").to('cuda')
+
+    generated_ids = model.generate(
+        model_inputs.input_ids,
+        max_new_tokens=1
+    )
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
+
+    return tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+    
 # Configs
 output_path = "outputs/"
 json_file = "results.json"
 output_folder = "outputs"
+search_base = 'simple' #'llm'
+llm = "Qwen/Qwen2-0.5B-Instruct"
 prompt = "Describe the scene with objects and their colors, number of lanes, whether it's marked or not, weather (sunny, rainy, snow, cloudy), and time of day (morning, night, dawn, dusk). Mention pedestrians if present."
 # prompt = "Describe the road driving scene in detail"
 
@@ -89,6 +125,7 @@ opt = tab1.selectbox(
     ("MoonDream", "BLIP", "GIT", "UForm"),
 )
 model, processor = load_model(opt)
+llmmodel, llmtokenizer = load_llm_search(llm)
 folder_path = tab1.text_input("Enter image folder path", value="data/")
 if tab1.button("Process Images"):
     if not os.path.exists(folder_path):
@@ -131,7 +168,7 @@ opt = tab2.selectbox(
     "Select a VLM model to use for search",
     ("MoonDream", "BLIP", "GIT", "UForm"),
 )            
-search_term = tab2.text_input("Enter search term", "")
+search_term = tab2.text_input("Enter search terms (seperated by spaces)", "")
 
 night = {'tag':'night', 'toggle': False}
 morning = {'tag':'morning', 'toggle': False}
@@ -171,27 +208,43 @@ if tab2.button("Search"):
             for filename, data in results.items():
                 description = data.get('description', "")
                 md = data.get('model', "")
-                search_term_lower = search_term.lower()
+                search_term_lower = search_term.lower().split()
                 words = description.lower().replace(',', '').split()
                 search_terms = []
-                search_terms.append(search_term_lower)
                 for tag in [night, morning, sunny, rainy, snow, fog]:
                     if tag['toggle']:
                         search_terms.append(tag['tag'])
-                if set(search_terms).issubset(words):
-                    highlighted_words = [
-                        # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
-                        f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() in search_terms else word 
-                        for word in words
-                    ]
-                    highlighted_description = " ".join(highlighted_words)
-                    matches.append({
-                        "filename": filename,
-                        "description": highlighted_description,
-                        "model": md,
-                    })
+                search_terms=search_terms+search_term_lower
+                if search_base == 'llm':
+                    resp = llm_search(search_terms, description, llmmodel, llmtokenizer)
+                    print(resp)
+                    if resp.lower() == 'true':
+                        highlighted_words = [
+                                # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
+                                f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() in search_terms else word 
+                                for word in words
+                            ]
+                        highlighted_description = " ".join(highlighted_words)
+                        matches.append({
+                            "filename": filename,
+                            "description": highlighted_description,
+                            "model": md,
+                        })
+                else:
+                    # if set(search_terms).issubset(words):
+                    if [i for i in search_terms if i in words]:
+                        highlighted_words = [
+                            # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
+                            f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() in search_terms else word 
+                            for word in words
+                        ]
+                        highlighted_description = " ".join(highlighted_words)
+                        matches.append({
+                            "filename": filename,
+                            "description": highlighted_description,
+                            "model": md,
+                        })
                     
-            
             if matches:
                 tab2.subheader("Matches Found:")
                 for match in matches:                    
