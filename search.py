@@ -125,7 +125,7 @@ opt = tab1.selectbox(
     ("MoonDream", "BLIP", "GIT", "UForm"),
 )
 model, processor = load_model(opt)
-llmmodel, llmtokenizer = load_llm_search(llm)
+# llmmodel, llmtokenizer = load_llm_search(llm)
 folder_path = tab1.text_input("Enter image folder path", value="data/")
 if tab1.button("Process Images"):
     if not os.path.exists(folder_path):
@@ -166,7 +166,7 @@ if tab1.button("Process Images"):
 
 opt = tab2.selectbox(
     "Select a VLM model to use for search",
-    ("MoonDream", "BLIP", "GIT", "UForm"),
+    ("MoonDream", "BLIP", "GIT", "UForm", "Qwen"),
 )            
 search_term = tab2.text_input("Enter search terms (seperated by spaces)", "")
 
@@ -177,26 +177,26 @@ rainy = {'tag':'rainy', 'toggle': False}
 snow = {'tag':'snow', 'toggle': False}
 fog = {'tag':'fog', 'toggle': False}
 
-tab2.write("Select time of day")
-c = tab2.container()
-with tab2:
-    col11, col12, _, _, _, _ = st.columns(6)
-    with col11:
-        night['toggle'] = st.checkbox("Night")
-    with col12:
-        morning['toggle'] = st.checkbox("Morning")
+# tab2.write("Select time of day")
+# c = tab2.container()
+# with tab2:
+#     col11, col12, _, _, _, _ = st.columns(6)
+#     with col11:
+#         night['toggle'] = st.checkbox("Night")
+#     with col12:
+#         morning['toggle'] = st.checkbox("Morning")
 
-tab2.write("Select weather")
-with tab2:
-    col21, col22, col23, col24, _, _  = st.columns(6)
-    with col21:
-        sunny['toggle'] = st.checkbox("Clear")
-    with col22:
-        rainy['toggle'] = st.checkbox("Rainy")
-    with col23:
-        snow['toggle'] = st.checkbox("Snow")
-    with col24:
-        fog['toggle'] = st.checkbox("Fog")
+# tab2.write("Select weather")
+# with tab2:
+#     col21, col22, col23, col24, _, _  = st.columns(6)
+#     with col21:
+#         sunny['toggle'] = st.checkbox("Clear")
+#     with col22:
+#         rainy['toggle'] = st.checkbox("Rainy")
+#     with col23:
+#         snow['toggle'] = st.checkbox("Snow")
+#     with col24:
+#         fog['toggle'] = st.checkbox("Fog")
 
 if tab2.button("Search"):
     if search_term:
@@ -209,12 +209,13 @@ if tab2.button("Search"):
                 description = data.get('description', "")
                 md = data.get('model', "")
                 search_term_lower = search_term.lower().split()
-                words = description.lower().replace(',', '').split()
+                words = description.lower().replace(',', '').replace('.', '').split()
                 search_terms = []
                 for tag in [night, morning, sunny, rainy, snow, fog]:
                     if tag['toggle']:
                         search_terms.append(tag['tag'])
                 search_terms=search_terms+search_term_lower
+                search_terms = [word for word in search_terms if word not in ['a', 'in', 'on']]
                 if search_base == 'llm':
                     resp = llm_search(search_terms, description, llmmodel, llmtokenizer)
                     print(resp)
@@ -233,6 +234,7 @@ if tab2.button("Search"):
                 else:
                     # if set(search_terms).issubset(words):
                     if [i for i in search_terms if i in words]:
+                        count = sum(1 for i in search_terms if i in words)
                         highlighted_words = [
                             # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
                             f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() in search_terms else word 
@@ -243,13 +245,16 @@ if tab2.button("Search"):
                             "filename": filename,
                             "description": highlighted_description,
                             "model": md,
+                            "count": count,
                         })
                     
             if matches:
                 tab2.subheader("Matches Found:")
+                matches.sort(key=lambda x: x["count"], reverse=True)
+                matches = [matches[0]] # select the best
                 for match in matches:                    
                     tab2.markdown(f"""**File**: {match['filename']} <br> **VLM Model**: {match['model']}""", unsafe_allow_html=True)
-                    tab2.markdown(body=f"**Description**: {match['description']}", unsafe_allow_html=True, help=None)
+                    # tab2.markdown(body=f"**Description**: {match['description']}", unsafe_allow_html=True, help=None)
                     
                     image_path = os.path.join("data", match['filename'])
                     if os.path.exists(image_path):
