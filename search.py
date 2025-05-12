@@ -81,6 +81,15 @@ def load_llm_search(lm):
     llmtokenizer = AutoTokenizer.from_pretrained(lm)
     return llmmodel, llmtokenizer
 
+def remove_duplicates(input_list):
+    seen = set()
+    new_list = []
+    for item in input_list:
+        if item not in seen:
+            new_list.append(item)
+            seen.add(item)
+    return new_list
+
 def llm_search(terms, words, model, tokenizer):
     prompt = f"'{words}'. Does the paragraph explicitly say anything about atleast one of {terms}?. It has to be a word match either direct, adjective, verb or derived. Reply with True or False."
     messages = [
@@ -167,8 +176,14 @@ if tab1.button("Process Images"):
 opt = tab2.selectbox(
     "Select a VLM model to use for search",
     ("MoonDream", "BLIP", "GIT", "UForm", "Qwen"),
-)            
-search_term = tab2.text_input("Enter search terms (seperated by spaces)", "")
+)
+
+search_term = tab2.text_input("Enter search term", "")
+
+result_thres = tab2.slider(
+    "How many results needed?",
+    value=2,
+)
 
 night = {'tag':'night', 'toggle': False}
 morning = {'tag':'morning', 'toggle': False}
@@ -218,7 +233,6 @@ if tab2.button("Search"):
                 search_terms = [word for word in search_terms if word not in ['a', 'in', 'on']]
                 if search_base == 'llm':
                     resp = llm_search(search_terms, description, llmmodel, llmtokenizer)
-                    print(resp)
                     if resp.lower() == 'true':
                         highlighted_words = [
                                 # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
@@ -235,25 +249,34 @@ if tab2.button("Search"):
                     # if set(search_terms).issubset(words):
                     if [i for i in search_terms if i in words]:
                         count = sum(1 for i in search_terms if i in words)
-                        highlighted_words = [
-                            # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
-                            f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() in search_terms else word 
-                            for word in words
-                        ]
+                        highlighted_words = []
+                        matched_words = []
+                        # highlighted_words = [
+                        #     # f":orange-badge[**{word}**]" if word.lower() == search_term_lower else word
+                        #     f'<text style="background-color: #f8ff29">{word}</text>' if word.lower() in search_terms else word 
+                        #     for word in words
+                        # ]
+                        for word in words:
+                            if word.lower() in search_terms:
+                                highlighted_words.append(f'<text style="background-color: #f8ff29">{word}</text>')
+                                matched_words.append(word)
+                            else:
+                                highlighted_words.append(word)
                         highlighted_description = " ".join(highlighted_words)
                         matches.append({
                             "filename": filename,
                             "description": highlighted_description,
                             "model": md,
                             "count": count,
+                            "matched_words": matched_words,
                         })
                     
             if matches:
                 tab2.subheader("Matches Found:")
                 matches.sort(key=lambda x: x["count"], reverse=True)
-                matches = [matches[0]] # select the best
+                matches = matches[:result_thres]#[matches[0]] # select the best
                 for match in matches:                    
-                    tab2.markdown(f"""**File**: {match['filename']} <br> **VLM Model**: {match['model']}""", unsafe_allow_html=True)
+                    tab2.markdown(f"""**File**: {match['filename']} <br> **VLM Model**: {match['model']} <br> **Matches**: {", ".join(remove_duplicates(match['matched_words']))}""", unsafe_allow_html=True)
                     # tab2.markdown(body=f"**Description**: {match['description']}", unsafe_allow_html=True, help=None)
                     
                     image_path = os.path.join("data", match['filename'])
