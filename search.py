@@ -14,6 +14,8 @@ from PIL import Image
 from transformers import AutoModel, AutoModelForCausalLM, BlipProcessor, BlipForConditionalGeneration, AutoProcessor, AutoTokenizer
 import torch
 
+torch.classes.__path__ = [] # add this line to manually set it to empty.
+
 # Model loading
 @st.cache_resource
 def load_model(opt):
