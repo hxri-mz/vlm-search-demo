@@ -13,7 +13,6 @@ import json
 from PIL import Image
 from transformers import AutoModel, AutoModelForCausalLM, BlipProcessor, BlipForConditionalGeneration, AutoProcessor, AutoTokenizer
 import torch
-from openai import OpenAI
 
 # Model loading
 @st.cache_resource
