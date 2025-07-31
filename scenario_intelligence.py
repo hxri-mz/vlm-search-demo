@@ -11,8 +11,9 @@ import streamlit as st
 import os
 import json
 from PIL import Image
-from transformers import AutoModel, AutoModelForCausalLM, BlipProcessor, BlipForConditionalGeneration, AutoProcessor, AutoTokenizer
+from transformers import AutoModel, AutoModelForCausalLM, BlipProcessor, BlipForConditionalGeneration, Qwen2_5_VLForConditionalGeneration, AutoTokenizer, AutoProcessor
 import torch
+from qwen_vl_utils import process_vision_info
 
 torch.classes.__path__ = [] # add this line to manually set it to empty.
 
@@ -27,17 +28,9 @@ def load_model(opt):
                 device_map={"": "cuda"}
             )
         return model, None
-    elif opt == 'BLIP':
-        processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large")
-        model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large").to("cuda")
-        return model, processor
-    elif opt == 'GIT':
-        processor = AutoProcessor.from_pretrained("microsoft/git-base-coco")
-        model = AutoModelForCausalLM.from_pretrained("microsoft/git-base-coco").to("cuda")
-        return model, processor
-    elif opt == 'UForm':
-        model = AutoModel.from_pretrained("unum-cloud/uform-gen2-dpo", trust_remote_code=True).to("cpu")
-        processor = AutoProcessor.from_pretrained("unum-cloud/uform-gen2-dpo", trust_remote_code=True)
+    elif opt == 'Qwen':
+        processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-3B-Instruct")
+        model = Qwen2_5_VLForConditionalGeneration.from_pretrained("Qwen/Qwen2.5-VL-3B-Instruct", torch_dtype="auto", device_map="cpu")
         return model, processor
 
 def process_data(opt, image, model, processor, prompt):
@@ -46,32 +39,43 @@ def process_data(opt, image, model, processor, prompt):
         description = model.query(encoded_image, prompt)['answer']
         return description
     
-    elif opt == 'BLIP':
-        inputs = processor(image, return_tensors="pt").to("cuda")
-        out = model.generate(**inputs)
-        description = processor.decode(out[0], skip_special_tokens=True)
-        return description
-    
-    elif opt == 'GIT':
-        pixel_values = processor(images=image, return_tensors="pt").pixel_values.to("cuda")
-        generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
-        generated_caption = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        return generated_caption
-    
-    elif opt == 'UForm':
-        inputs = processor(text=[prompt], images=[image], return_tensors="pt").to("cpu")
-        with torch.inference_mode():
-            output = model.generate(
-                **inputs,
-                do_sample=False,
-                use_cache=True,
-                max_new_tokens=256,
-                eos_token_id=151645,
-                pad_token_id=processor.tokenizer.pad_token_id
-            )
-        prompt_len = inputs["input_ids"].shape[1]
-        decoded_text = processor.batch_decode(output[:, prompt_len:])[0]
-        return decoded_text
+    elif opt == 'Qwen':
+        messages = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image",
+                                "image": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen-VL/assets/demo.jpeg",
+                            },
+                            {"type": "text", "text": "Describe this image."},
+                        ],
+                    }
+                ]
+        # Preparation for inference
+        text = processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        image_inputs, video_inputs = process_vision_info(messages)
+        inputs = processor(
+            text=[text],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+            use_fast=True,
+        )
+        inputs = inputs.to("cpu")
+
+        # Inference: Generation of the output
+        generated_ids = model.generate(**inputs, max_new_tokens=128)
+        generated_ids_trimmed = [
+            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+        ]
+        output_text = processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )
+        return output_text
     
 def load_llm_search(lm):
     llmmodel = AutoModelForCausalLM.from_pretrained(
@@ -132,7 +136,7 @@ tab1, tab2 = st.tabs(["Process data", "Search"])
 
 opt = tab1.selectbox(
     "Select a VLM model to process data",
-    ("MoonDream", "BLIP", "GIT", "UForm"),
+    ("MoonDream", "Qwen"),
 )
 model, processor = load_model(opt)
 # llmmodel, llmtokenizer = load_llm_search(llm)
@@ -176,7 +180,7 @@ if tab1.button("Process Images"):
 
 opt = tab2.selectbox(
     "Select a VLM model to use for search",
-    ("MoonDream", "BLIP", "GIT", "UForm", "Qwen"),
+    ("MoonDream", "Qwen"),
 )
 
 search_term = tab2.text_input("Enter search term", "")
@@ -185,34 +189,6 @@ result_thres = tab2.slider(
     "How many results needed?",
     value=2,
 )
-
-night = {'tag':'night', 'toggle': False}
-morning = {'tag':'morning', 'toggle': False}
-sunny = {'tag':'sunny', 'toggle': False}
-rainy = {'tag':'rainy', 'toggle': False}
-snow = {'tag':'snow', 'toggle': False}
-fog = {'tag':'fog', 'toggle': False}
-
-# tab2.write("Select time of day")
-# c = tab2.container()
-# with tab2:
-#     col11, col12, _, _, _, _ = st.columns(6)
-#     with col11:
-#         night['toggle'] = st.checkbox("Night")
-#     with col12:
-#         morning['toggle'] = st.checkbox("Morning")
-
-# tab2.write("Select weather")
-# with tab2:
-#     col21, col22, col23, col24, _, _  = st.columns(6)
-#     with col21:
-#         sunny['toggle'] = st.checkbox("Clear")
-#     with col22:
-#         rainy['toggle'] = st.checkbox("Rainy")
-#     with col23:
-#         snow['toggle'] = st.checkbox("Snow")
-#     with col24:
-#         fog['toggle'] = st.checkbox("Fog")
 
 if tab2.button("Search"):
     if search_term:
@@ -227,9 +203,6 @@ if tab2.button("Search"):
                 search_term_lower = search_term.lower().split()
                 words = description.lower().replace(',', '').replace('.', '').split()
                 search_terms = []
-                for tag in [night, morning, sunny, rainy, snow, fog]:
-                    if tag['toggle']:
-                        search_terms.append(tag['tag'])
                 search_terms=search_terms+search_term_lower
                 search_terms = [word for word in search_terms if word not in ['a', 'in', 'on']]
                 if search_base == 'llm':
