@@ -3,3 +3,7 @@ transformers
 pillow
 einops
 pyvips
+streamlit
+torchvision
+accelerate
+qwen_vl_utils
