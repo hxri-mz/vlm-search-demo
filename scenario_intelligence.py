@@ -132,65 +132,65 @@ prompt = "Describe the scene with objects and their colors, number of lanes, whe
 st.title("Scenario Intelligence")
 st.markdown('Make sure to run  <text style="border: 1.5px solid #72b3b5; border-radius: 8px; padding: 1.5px 6px 3.5px 6px; margin: 0px 6px 0px 6px;">Process data</text>  before searching', unsafe_allow_html=True, help=None)
 
-tab1, tab2 = st.tabs(["Process data", "Search"])
+# tab1, tab2 = st.tabs(["Search", ""])
 
-opt = tab1.selectbox(
-    "Select a VLM model to process data",
-    ("MoonDream", "Qwen"),
-)
-model, processor = load_model(opt)
+# opt = tab1.selectbox(
+#     "Select a VLM model to process data",
+#     ("MoonDream", "Qwen"),
+# )
+# model, processor = load_model(opt)
 # llmmodel, llmtokenizer = load_llm_search(llm)
-folder_path = tab1.text_input("Enter image folder path", value="data/")
-if tab1.button("Process Images"):
-    if not os.path.exists(folder_path):
-        tab1.error("Folder path does not exist.")
-    else:
-        os.makedirs(output_folder, exist_ok=True)
-        results = {}
+# folder_path = tab1.text_input("Enter image folder path", value="data/")
+# if tab1.button("Process Images"):
+#     if not os.path.exists(folder_path):
+#         tab1.error("Folder path does not exist.")
+#     else:
+#         os.makedirs(output_folder, exist_ok=True)
+#         results = {}
 
-        image_files = [f for f in os.listdir(folder_path)
-                    if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+#         image_files = [f for f in os.listdir(folder_path)
+#                     if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
 
-        total_images = len(image_files)
+#         total_images = len(image_files)
 
-        pbar = tab1.progress(0)
-        count = 0
-        for idx, fname in enumerate(image_files):
-            print(f'processing {idx}')
-            image_path = os.path.join(folder_path, fname)
-            image = Image.open(image_path).convert("RGB")
+#         pbar = tab1.progress(0)
+#         count = 0
+#         for idx, fname in enumerate(image_files):
+#             print(f'processing {idx}')
+#             image_path = os.path.join(folder_path, fname)
+#             image = Image.open(image_path).convert("RGB")
             
-            try:
-                description = process_data(opt, image, model, processor, prompt)
-                results[fname] = {
-                    "description": description,
-                    "model": opt,
-                }
+#             try:
+#                 description = process_data(opt, image, model, processor, prompt)
+#                 results[fname] = {
+#                     "description": description,
+#                     "model": opt,
+#                 }
 
-            except Exception as e:
-                tab1.warning(f"Error processing {fname}: {e}")
-                continue
-            count += 1
-            pbar.progress(count + int(100/total_images))
-        with open(output_path+opt+'_'+json_file, "w") as f:
-            json.dump(results, f, indent=4)
-        pbar.empty()
+#             except Exception as e:
+#                 tab1.warning(f"Error processing {fname}: {e}")
+#                 continue
+#             count += 1
+#             pbar.progress(count + int(100/total_images))
+#         with open(output_path+opt+'_'+json_file, "w") as f:
+#             json.dump(results, f, indent=4)
+#         pbar.empty()
 
-        tab1.success(f"Processing complete. Output saved to {output_path+opt+'_'+json_file}")
+#         tab1.success(f"Processing complete. Output saved to {output_path+opt+'_'+json_file}")
 
-opt = tab2.selectbox(
+opt = st.selectbox(
     "Select a VLM model to use for search",
     ("MoonDream", "Qwen"),
 )
 
-search_term = tab2.text_input("Enter search term", "")
+search_term = st.text_input("Enter search term", "")
 
-result_thres = tab2.slider(
+result_thres = st.slider(
     "How many results needed?",
     value=2,
 )
 
-if tab2.button("Search"):
+if st.button("Search"):
     if search_term:
         if os.path.exists(output_path+opt+'_'+json_file):
             with open(output_path+opt+'_'+json_file, "r") as f:
@@ -246,24 +246,24 @@ if tab2.button("Search"):
                         })
                     
             if matches:
-                tab2.subheader("Matches Found:")
+                st.subheader("Matches Found:")
                 matches.sort(key=lambda x: x["count"], reverse=True)
                 matches = matches[:result_thres]#[matches[0]] # select the best
                 for match in matches:                    
-                    tab2.markdown(f"""**File**: {match['filename']} <br> **VLM Model**: {match['model']} <br> **Matches**: {", ".join(remove_duplicates(match['matched_words']))}""", unsafe_allow_html=True)
-                    # tab2.markdown(body=f"**Description**: {match['description']}", unsafe_allow_html=True, help=None)
+                    st.markdown(f"""**File**: {match['filename']} <br> **VLM Model**: {match['model']} <br> **Matches**: {", ".join(remove_duplicates(match['matched_words']))}""", unsafe_allow_html=True)
+                    # st.markdown(body=f"**Description**: {match['description']}", unsafe_allow_html=True, help=None)
                     
                     image_path = os.path.join("data", match['filename'])
                     if os.path.exists(image_path):
                         image = Image.open(image_path)                        
-                        tab2.image(image)
+                        st.image(image)
                     else:
-                        tab2.warning(f"Image file {match['filename']} not found.")
-                    tab2.divider()
+                        st.warning(f"Image file {match['filename']} not found.")
+                    st.divider()
 
             else:
-                tab2.write("No matches found.")
+                st.write("No matches found.")
         else:
-            tab2.error(f"No results found. Please process images first.")
+            st.error(f"No results found. Please process images first.")
     else:
-        tab2.warning(f"Enter a search term.")
+        st.warning(f"Enter a search term.")
